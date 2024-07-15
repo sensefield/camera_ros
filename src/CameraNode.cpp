@@ -257,8 +257,8 @@ CameraNode::CameraNode(const rclcpp::NodeOptions &options) : Node("camera", opti
   // list all camera formats, including those not supported by the ROS message
   RCLCPP_DEBUG_STREAM(get_logger(), scfg.formats());
 
-  if (common_fmt.empty())
-    throw std::runtime_error("camera does not provide any of the supported pixel formats");
+  // if (common_fmt.empty())
+  //   throw std::runtime_error("camera does not provide any of the supported pixel formats");
 
   const std::string format = get_parameter("format").as_string();
   if (format.empty()) {
@@ -281,10 +281,10 @@ CameraNode::CameraNode(const rclcpp::NodeOptions &options) : Node("camera", opti
       throw std::runtime_error("invalid pixel format: \"" + format + "\"");
     }
     // check that the requested format is supported by camera and the node
-    if (std::find(common_fmt.begin(), common_fmt.end(), format_requested) == common_fmt.end()) {
-      RCLCPP_INFO_STREAM(get_logger(), stream_formats);
-      throw std::runtime_error("unsupported pixel format \"" + format + "\"");
-    }
+    // if (std::find(common_fmt.begin(), common_fmt.end(), format_requested) == common_fmt.end()) {
+    //   RCLCPP_INFO_STREAM(get_logger(), stream_formats);
+    //   throw std::runtime_error("unsupported pixel format \"" + format + "\"");
+    // }
     scfg.pixelFormat = format_requested;
   }
 
@@ -459,7 +459,15 @@ CameraNode::declareParameters()
       throw std::runtime_error("minimum and maximum parameter array sizes do not match");
 
     // clamp default ControlValue to min/max range and cast ParameterValue
-    const rclcpp::ParameterValue value = cv_to_pv(clamp(info.def(), info.min(), info.max()), extent);
+    rclcpp::ParameterValue value;
+    try {
+      value = cv_to_pv(clamp(info.def(), info.min(), info.max()), extent);
+    }
+    catch (const std::length_error &e) {
+      // ignore
+      RCLCPP_WARN_STREAM(get_logger(), e.what());
+      continue;
+    }
 
     // get smallest bounds for minimum and maximum set
     rcl_interfaces::msg::IntegerRange range_int;

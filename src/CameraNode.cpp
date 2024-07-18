@@ -299,6 +299,10 @@ CameraNode::CameraNode(const rclcpp::NodeOptions &options) : Node("camera", opti
     scfg.size = size;
   }
 
+  cfg->sensorConfig = libcamera::SensorConfiguration();
+  cfg->sensorConfig->outputSize = libcamera::Size(2328, 1748);
+  cfg->sensorConfig->bitDepth = 10;
+
   // store selected stream configuration
   const libcamera::StreamConfiguration selected_scfg = scfg;
 
